@@ -1,0 +1,278 @@
+{
+  "schema_version": "1",
+  "capabilities": [
+    "门店与菜单查询",
+    "券校验与报价验证",
+    "下单与订单查询",
+    "营养映射与清淡判定"
+  ],
+  "dependencies": [
+    {
+      "id": "mcd-mcp",
+      "type": "mcp",
+      "required": true,
+      "auth_type": "token",
+      "capabilities": [
+        "门店与菜单查询",
+        "券校验与报价验证",
+        "下单与订单查询",
+        "营养映射与清淡判定"
+      ],
+      "checks": [
+        {
+          "id": "mcp-registered",
+          "type": "mcp",
+          "required": true,
+          "server": "mcd-mcp"
+        },
+        {
+          "id": "mcp-probe",
+          "type": "mcp_probe",
+          "required": true,
+          "target": "mcd-mcp"
+        },
+        {
+          "id": "auth-probe",
+          "type": "auth_probe",
+          "required": true,
+          "target": "mcd-mcp"
+        }
+      ],
+      "setup": {
+        "official_home_url": "https://open.mcd.cn/mcp",
+        "official_docs_url": "https://github.com/M-China/mcd-mcp-server",
+        "login_url": "https://open.mcd.cn/mcp",
+        "credential_url": "https://open.mcd.cn/mcp",
+        "console_path": [
+          "打开 https://open.mcd.cn/mcp",
+          "点击右上角「登录」并用手机号完成验证",
+          "点击右上角「控制台」打开控制台弹窗",
+          "点击「激活」申请 MCP Token",
+          "阅读并同意服务协议",
+          "复制 Token 并填入连接器配置"
+        ],
+        "scopes": [
+          "麦当劳 MCP 已开放工具的全部调用权限，官方未提供细粒度权限划分"
+        ],
+        "credential_storage": "WorkBuddy 连接器配置中 mcd-mcp 条目的 Authorization 请求头，格式为 Bearer <Token>；不写入本 Skill 任何文件，不提交公开仓库，不在对话中回显。",
+        "steps": [
+          "打开 https://open.mcd.cn/mcp，点击右上角「登录」，使用手机号完成验证。",
+          "点击右上角「控制台」打开控制台弹窗。",
+          "点击「激活」申请 MCP Token，阅读并同意服务协议。",
+          "复制 Token，在 WorkBuddy 连接器页的「自定义连接器 → 配置 MCP」中把 mcd-mcp 条目的 Authorization 填为 Bearer <Token> 并保存。",
+          "回到自定义连接器列表启用 mcd-mcp，并对其点击「信任」。",
+          "调用 mcd-mcp 的 now-time-info 做最小验证，成功后按 references/setup-guide.md 写入 probe-results.json。",
+          "运行 python scripts/check_environment.py --network --probe-results probe-results.json 复核状态。"
+        ],
+        "verify": "调用 mcd-mcp 的 now-time-info（无入参、只读、不涉及资产），能返回当前时间即表示鉴权与连通正常。",
+        "rotate_or_revoke": "轮换：回到 https://open.mcd.cn/mcp 控制台重新激活取得新 Token，替换连接器中的旧值。撤销：在控制台使旧 Token 失效，或在客户端删除 mcd-mcp 连接器条目并停用。",
+        "security": "Token 代表该账号在 MCP 开放能力上的完整权限，包含会员资产读取与下单，视同高敏感凭据。只存放于连接器配置；不得粘贴到对话、日志或错误信息；不得写入 Skill 文件或提交公开仓库。下单与取消订单属于改变真实状态的操作，必须取得用户明确确认。",
+        "verified_at": "2026-10-12",
+        "applies_to_version": "mcd-mcp-server 远程 Streamable HTTP 服务，依据官方仓库 README 2026-10-01 更新内容核验"
+      },
+      "degradation": [
+        {
+          "capability": "门店与菜单查询",
+          "trigger": "mcd-mcp 未注册、未信任，或探测返回 mcp_not_registered、network_or_timeout、service_error",
+          "fallback": "不产出任何方案。按 references/setup-guide.md 输出缺失项的配置步骤，等待用户完成后重新检查。",
+          "user_input": "确认是否愿意配置麦当劳 MCP 连接器",
+          "limitations": "无法取得任何真实门店、菜单与券数据",
+          "evidence_label": "已验证",
+          "recovery": "完成 Token 申请与连接器启用、信任后重新运行环境检查",
+          "stop_condition": "用户明确拒绝配置时停止全程"
+        },
+        {
+          "capability": "券校验与报价验证",
+          "trigger": "探测返回 auth_expired_or_invalid（对应 401）或 quota_or_rate_limit（对应 429）",
+          "fallback": "鉴权失效时停止报价流程并引导重新申请 Token；限流时降低调用频率并限制重试，仍失败则改为输出已确认可售的少量方案并标注未穷尽候选",
+          "user_input": "无",
+          "limitations": "无法校验券可用性，或候选组合未穷尽，结论可能不是全局最优",
+          "evidence_label": "部分验证",
+          "recovery": "在控制台重新激活 Token，或等待限流窗口过去后重试",
+          "stop_condition": "鉴权持续失败或持续限流时停止，不输出未验证的最优结论"
+        },
+        {
+          "capability": "下单与订单查询",
+          "trigger": "用户未对价格明细、取餐方式与餐品清单给出明确确认",
+          "fallback": "输出可复制的下单清单与取餐方式，说明未创建订单",
+          "user_input": "需要用户明确确认后才可下单",
+          "limitations": "未生成订单，也没有支付链接",
+          "evidence_label": "已验证",
+          "recovery": "用户确认后重新执行下单流程",
+          "stop_condition": "用户拒绝确认时不下单"
+        },
+        {
+          "capability": "营养映射与清淡判定",
+          "trigger": "餐品在营养数据中无对应条目，或名称无法唯一匹配规格",
+          "fallback": "标记为「暂无营养数据」，该餐品只参与价格比较；规格无法唯一确定时先用 query-meal-detail 取默认项，仍不唯一则请用户指定",
+          "user_input": "提出无营养数据的餐品时，确认是否只按价格比较",
+          "limitations": "不输出任何热量、蛋白质、脂肪与钠数值，也不输出清淡档位",
+          "evidence_label": "已验证",
+          "recovery": "麦当劳补充该餐品营养数据后重新映射",
+          "stop_condition": "用户坚持要求给出营养结论时说明无法提供，不估算代替"
+        }
+      ]
+    },
+    {
+      "id": "python-runtime",
+      "type": "runtime",
+      "required": true,
+      "auth_type": "none",
+      "capabilities": [
+        "营养映射与清淡判定"
+      ],
+      "checks": [
+        {
+          "id": "python-version",
+          "type": "python",
+          "required": true,
+          "min_version": "3.10"
+        }
+      ],
+      "setup": {
+        "official_home_url": "https://www.python.org/",
+        "official_docs_url": "https://docs.python.org/3/",
+        "steps": [
+          "确认已安装 Python 3.10 或更高版本；未安装时从 https://www.python.org/ 获取，参考 https://docs.python.org/3/ 的使用说明。",
+          "运行 python scripts/check_environment.py 确认能输出 JSON。"
+        ],
+        "verify": "python scripts/check_environment.py 能正常输出 JSON，即说明运行环境可用。",
+        "security": "脚本只使用标准库，不联网、不调用 MCP、不读取凭据；仅写入 --output 指定的路径，不修改任何配置。",
+        "verified_at": "2026-10-12",
+        "applies_to_version": "Python 3.10 及以上"
+      },
+      "degradation": [
+        {
+          "capability": "营养映射与清淡判定",
+          "trigger": "Python 缺失，或版本低于 3.10",
+          "fallback": "跳过脚本，改为按 references/nutrition-mapping.md 与 references/nutrition-standards.md 的规则手工比对与计算，并在输出中标注「未运行脚本验证」",
+          "user_input": "无",
+          "limitations": "名称归一化与脂肪供能比由人工计算，存在出错风险，结果标记为部分验证",
+          "evidence_label": "部分验证",
+          "recovery": "安装 Python 3.10 以上版本后重新运行脚本核对",
+          "stop_condition": "无营养数据且无法人工核对时，不输出任何档位结论"
+        }
+      ]
+    },
+    {
+      "id": "network",
+      "type": "network",
+      "required": true,
+      "auth_type": "none",
+      "capabilities": [
+        "门店与菜单查询",
+        "券校验与报价验证",
+        "下单与订单查询",
+        "营养映射与清淡判定"
+      ],
+      "checks": [
+        {
+          "id": "mcd-endpoint-reachability",
+          "type": "url",
+          "required": true,
+          "url": "https://open.mcd.cn/mcp",
+          "method": "GET",
+          "expected_status": [
+            200
+          ]
+        }
+      ],
+      "setup": {
+        "official_home_url": "https://open.mcd.cn/mcp",
+        "official_docs_url": "https://github.com/M-China/mcd-mcp-server",
+        "steps": [
+          "确认当前网络可访问 https://open.mcd.cn/mcp。",
+          "运行 python scripts/check_environment.py --network 复核可达性。"
+        ],
+        "verify": "对 https://open.mcd.cn/mcp 发 GET 请求返回 200。该探测只验证平台可达性，不代表 MCP 会话与鉴权状态。",
+        "security": "探测只发送匿名只读请求，不携带任何凭据。",
+        "verified_at": "2026-10-12",
+        "applies_to_version": "麦当劳中国 MCP 开放平台"
+      },
+      "degradation": [
+        {
+          "capability": "门店与菜单查询",
+          "trigger": "探测返回 network_or_timeout",
+          "fallback": "停止流程并说明需要恢复网络，不产出方案",
+          "user_input": "无",
+          "limitations": "无法取得任何实时门店与菜单数据",
+          "evidence_label": "已验证",
+          "recovery": "恢复网络后重新运行环境检查",
+          "stop_condition": "网络不可达时停止全程"
+        },
+        {
+          "capability": "券校验与报价验证",
+          "trigger": "探测返回 network_or_timeout，或请求过程中反复超时",
+          "fallback": "有限次数重试；持续失败时停止报价，说明无法确认券可用性与成交价",
+          "user_input": "无",
+          "limitations": "无法给出实付金额，只能列出未验证的候选组合",
+          "evidence_label": "未验证",
+          "recovery": "恢复网络后重新执行报价验证",
+          "stop_condition": "未能经报价验证的组合一律不得对外呈现价格"
+        },
+        {
+          "capability": "下单与订单查询",
+          "trigger": "探测返回 network_or_timeout",
+          "fallback": "输出可复制的下单清单，说明因网络不可达未创建订单，也未查询订单状态",
+          "user_input": "无",
+          "limitations": "未生成订单，无法查询历史或进行中订单",
+          "evidence_label": "已验证",
+          "recovery": "恢复网络后重新执行下单或订单查询",
+          "stop_condition": "网络不可达时不下单"
+        },
+        {
+          "capability": "营养映射与清淡判定",
+          "trigger": "探测返回 network_or_timeout，无法取得营养数据",
+          "fallback": "说明无法取得营养数据，价格相关能力同样不可用，因此本轮不输出方案",
+          "user_input": "无",
+          "limitations": "无营养数据与价格数据，任何结论都不成立",
+          "evidence_label": "已验证",
+          "recovery": "恢复网络后重新执行完整流程",
+          "stop_condition": "无法取得营养数据时停止全部输出"
+        }
+      ]
+    }
+  ],
+  "functional_degradations": [
+    {
+      "capability": "门店与菜单查询",
+      "trigger": "MCP 未就绪或当前处于餐段切换空窗期，菜单接口仍返回上一餐段餐品",
+      "fallback": "MCP 未就绪时输出配置步骤；空窗期时告知下一餐段开始时间，不推荐已停售餐品",
+      "user_input": "无",
+      "limitations": "本轮无法给出可下单方案",
+      "evidence_label": "已验证",
+      "recovery": "完成配置或进入下一餐段后重新执行",
+      "stop_condition": "门店无法确定或用户未在多门店中选择时停止"
+    },
+    {
+      "capability": "券校验与报价验证",
+      "trigger": "用户自称持有某券但门店券接口未返回该券，或报价返回 60006「商品已售罄或不可售」",
+      "fallback": "列出券名与有效期窗口，说明当前门店、渠道或时段不适用，该券不参与比较；不可售商品移出候选集并改用其余可售组合",
+      "user_input": "无",
+      "limitations": "未使用该张券，实付金额可能高于用户预期；可推荐组合数量减少",
+      "evidence_label": "已验证",
+      "recovery": "券进入有效窗口或餐品恢复供应后重新查询并重算",
+      "stop_condition": "无可售组合时停止推荐，不推荐买不到的商品"
+    },
+    {
+      "capability": "下单与订单查询",
+      "trigger": "用户未对价格明细、取餐方式与餐品清单给出明确确认",
+      "fallback": "输出可复制的下单清单与取餐方式，说明未创建订单",
+      "user_input": "需要用户明确确认后才可下单",
+      "limitations": "未生成订单，也没有支付链接",
+      "evidence_label": "已验证",
+      "recovery": "用户确认后重新执行下单流程",
+      "stop_condition": "用户拒绝确认时不下单"
+    },
+    {
+      "capability": "营养映射与清淡判定",
+      "trigger": "餐品无营养数据，或名称无法唯一匹配规格，或「不油腻」在给定预算内无法达成",
+      "fallback": "无数据时标记「暂无营养数据」并只比较价格；规格不唯一时先取默认项或请用户指定；档位无法达成时如实说明并给出最接近档位的方案",
+      "user_input": "提出无营养数据餐品时确认是否只比价；规格不唯一时请用户指定口味",
+      "limitations": "不输出该餐品的营养数值与档位；无法达成「不油腻」时不改口径凑结论",
+      "evidence_label": "已验证",
+      "recovery": "营养数据补齐或用户放宽预算后重新判定",
+      "stop_condition": "用户坚持要求营养结论但数据缺失时说明无法提供，不估算代替"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">麦当劳订单详情卡片：订单状态、取餐凭证、商品与金额明细，可点击查询状态或发起取消</h2>
+<style>
+.mcd-card,.mcd-card *{box-sizing:border-box}
+.mcd-card button{font-family:inherit;font-size:13px;cursor:pointer;transition:background-color .15s ease,border-color .15s ease,transform .1s ease}
+.mcd-card button:focus-visible{outline:2px solid #DA291C;outline-offset:2px}
+.mcd-card .mcd-primary{background:#DA291C;border:1px solid #DA291C;color:#FFFFFF;font-weight:500}
+.mcd-card .mcd-primary:hover{background:#B71F14;border-color:#B71F14}
+.mcd-card .mcd-primary:active{transform:translateY(1px)}
+.mcd-card .mcd-ghost{background:transparent;border:1px solid var(--color-border-secondary,#D3D1C7);color:var(--color-text-primary,#2C2C2A);font-weight:500}
+.mcd-card .mcd-ghost:hover{background:var(--color-background-tertiary,#F1EFE8)}
+.mcd-card .mcd-danger{border:1px solid var(--color-border-secondary,#D3D1C7);color:#A32D2D;background:transparent;font-weight:500}
+.mcd-card .mcd-danger:hover{border-color:#A32D2D;background:#FCEBEB}
+.mcd-card .mcd-num{font-variant-numeric:tabular-nums}
+@media (max-width:430px){.mcd-card .mcd-actions{flex-direction:column!important}.mcd-card .mcd-code{font-size:32px!important}}
+@media (prefers-reduced-motion:reduce){.mcd-card button{transition:none}}
+</style>
+<div class="mcd-card" style="font-family:var(--font-sans,-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif);max-width:600px;background:var(--color-background-primary,#FFFFFF);border:1px solid var(--color-border-tertiary,#D3D1C7);border-radius:14px;overflow:hidden;color:var(--color-text-primary,#2C2C2A);line-height:1.5;">
+
+<div style="display:flex;height:6px;">
+  <span style="flex:0 0 62%;background:#FFC72C;"></span>
+  <span style="flex:1;background:#DA291C;"></span>
+</div>
+
+<div style="padding:15px 20px 0;display:flex;align-items:center;gap:9px;">
+  <svg width="26" height="22" viewBox="0 0 48 40" fill="none" aria-hidden="true" style="flex-shrink:0;display:block;">
+    <path d="M5 37.5C5 14.2 9.3 3.2 14 3.2c5.2 0 8.9 15.5 9.8 34.3C24.7 18.7 28.4 3.2 33.6 3.2c4.7 0 9 11 9 34.3" stroke="#DA291C" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span style="font-size:15px;font-weight:500;color:#DA291C;letter-spacing:.01em;">麦当劳</span>
+  <span style="font-size:11px;font-weight:400;letter-spacing:.14em;color:var(--color-text-secondary,#5F5E5A);">McDONALD'S</span>
+  <span style="margin-left:auto;flex-shrink:0;padding:4px 11px;font-size:11px;font-weight:500;border-radius:999px;background:{{STATUS_BG}};color:{{STATUS_FG}};">{{STATUS_TEXT}}</span>
+</div>
+
+<div style="padding:14px 20px 14px;">
+  <p style="margin:0;font-size:15px;font-weight:500;line-height:1.4;">{{STORE_NAME}}</p>
+  <p style="margin:5px 0 0;font-size:13px;line-height:1.55;color:var(--color-text-secondary,#5F5E5A);">{{ADDRESS}}</p>
+  <p style="margin:7px 0 0;font-size:11px;line-height:1.5;color:var(--color-text-secondary,#5F5E5A);">订单号 <span class="mcd-num" style="font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-variant-numeric:tabular-nums;">{{ORDER_ID}}</span></p>
+</div>
+
+{{PICKUP_CODE_BLOCK}}
+
+<div style="border-top:1px solid var(--color-border-tertiary,#E3E1D9);"></div>
+<div style="padding:14px 20px 16px;">
+  <p style="margin:0 0 11px;font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--color-text-secondary,#5F5E5A);">商品明细</p>
+  {{ITEMS_BLOCK}}
+</div>
+
+{{AMOUNT_BLOCK}}
+
+{{DELIVERY_BLOCK}}
+
+{{EXPIRY_BLOCK}}
+
+{{ACTIONS_BLOCK}}
+
+<div id="mcd-manual" hidden style="margin:0 20px 16px;padding:11px 13px;background:var(--color-background-secondary,#F7F6F2);border-radius:10px;">
+  <p style="margin:0;font-size:12px;line-height:1.6;color:var(--color-text-secondary,#5F5E5A);">当前环境不支持点击回传，请回到对话里发送这句：</p>
+  <p id="mcd-manual-text" class="mcd-num" style="margin:6px 0 0;font-size:13px;font-family:var(--font-mono,ui-monospace,Consolas,monospace);color:var(--color-text-primary,#2C2C2A);word-break:break-all;"></p>
+</div>
+
+</div>
+<script>
+function act(text) {
+  if (typeof sendPrompt === 'function') { sendPrompt(text); return; }
+  var box = document.getElementById('mcd-manual');
+  var out = document.getElementById('mcd-manual-text');
+  if (box && out) { out.textContent = text; box.hidden = false; }
+}
+</script>

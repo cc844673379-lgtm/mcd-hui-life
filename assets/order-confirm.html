@@ -1,0 +1,109 @@
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">麦当劳下单确认卡片：门店与距离、商品、营养指标与取餐信息，可点击换门店或确认下单</h2>
+<style>
+.mcd-card,.mcd-card *{box-sizing:border-box}
+.mcd-card button{font-family:inherit;font-size:13px;cursor:pointer;transition:background-color .15s ease,border-color .15s ease,transform .1s ease}
+.mcd-card button:focus-visible{outline:2px solid #DA291C;outline-offset:2px}
+.mcd-card .mcd-primary{background:#DA291C;border:1px solid #DA291C;color:#FFFFFF;font-weight:500}
+.mcd-card .mcd-primary:hover{background:#B71F14;border-color:#B71F14}
+.mcd-card .mcd-primary:active{transform:translateY(1px)}
+.mcd-card .mcd-ghost{background:transparent;border:1px solid var(--color-border-secondary,#D3D1C7);color:var(--color-text-primary,#2C2C2A);font-weight:500}
+.mcd-card .mcd-ghost:hover{background:var(--color-background-tertiary,#F1EFE8)}
+.mcd-card .mcd-store{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;padding:11px 13px;background:var(--color-background-primary,#FFFFFF);border:1px solid var(--color-border-tertiary,#D3D1C7);border-radius:10px;color:var(--color-text-primary,#2C2C2A)}
+.mcd-card .mcd-store:hover{border-color:#DA291C;background:#FFFBF9}
+.mcd-card .mcd-store:hover .mcd-go{color:#DA291C}
+.mcd-card .mcd-num{font-variant-numeric:tabular-nums}
+@media (max-width:430px){.mcd-card .mcd-metrics{grid-template-columns:minmax(0,1fr)!important;gap:14px!important}.mcd-card .mcd-actions{flex-direction:column!important}.mcd-card .mcd-pay{font-size:26px!important}}
+@media (prefers-reduced-motion:reduce){.mcd-card button{transition:none}}
+</style>
+<div class="mcd-card" style="font-family:var(--font-sans,-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif);max-width:600px;background:var(--color-background-primary,#FFFFFF);border:1px solid var(--color-border-tertiary,#D3D1C7);border-radius:14px;overflow:hidden;color:var(--color-text-primary,#2C2C2A);line-height:1.5;">
+
+<div style="display:flex;height:6px;">
+  <span style="flex:0 0 62%;background:#FFC72C;"></span>
+  <span style="flex:1;background:#DA291C;"></span>
+</div>
+
+<div style="padding:15px 20px 0;display:flex;align-items:center;gap:9px;">
+  <svg width="26" height="22" viewBox="0 0 48 40" fill="none" aria-hidden="true" style="flex-shrink:0;display:block;">
+    <path d="M5 37.5C5 14.2 9.3 3.2 14 3.2c5.2 0 8.9 15.5 9.8 34.3C24.7 18.7 28.4 3.2 33.6 3.2c4.7 0 9 11 9 34.3" stroke="#DA291C" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span style="font-size:15px;font-weight:500;color:#DA291C;letter-spacing:.01em;">麦当劳</span>
+  <span style="font-size:11px;font-weight:400;letter-spacing:.14em;color:var(--color-text-secondary,#5F5E5A);">McDONALD'S</span>
+  <span style="margin-left:auto;flex-shrink:0;padding:3px 10px;font-size:11px;font-weight:500;border-radius:999px;background:var(--color-background-secondary,#F1EFE8);color:var(--color-text-secondary,#5F5E5A);">{{CHANNEL}}</span>
+</div>
+
+<div style="padding:14px 20px 0;">
+  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;font-size:11px;font-weight:500;border-radius:999px;background:#FFF6DC;color:#7A4B00;">
+      <span style="width:5px;height:5px;border-radius:50%;background:#FFC72C;"></span>{{STORE_LABEL}}
+    </span>
+    <span class="mcd-num" style="font-size:12px;line-height:1.5;color:var(--color-text-secondary,#5F5E5A);font-variant-numeric:tabular-nums;">{{STORE_DISTANCE}}</span>
+  </div>
+  <p style="margin:11px 0 0;font-size:15px;font-weight:500;line-height:1.4;">{{STORE_NAME}}</p>
+  <p style="margin:5px 0 0;font-size:13px;line-height:1.55;color:var(--color-text-secondary,#5F5E5A);">{{ADDRESS}}</p>
+</div>
+
+<div style="margin:15px 20px 0;padding:14px 16px 15px;background:var(--color-background-secondary,#F7F6F2);border-left:3px solid #FFC72C;border-radius:12px;">
+  <p style="margin:0;font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--color-text-secondary,#5F5E5A);">实付</p>
+  <p class="mcd-num mcd-pay" style="margin:3px 0 0;font-size:30px;font-weight:500;letter-spacing:-.02em;line-height:1.15;color:#DA291C;font-variant-numeric:tabular-nums;">{{PAYABLE}}</p>
+  <div class="mcd-metrics" style="margin-top:13px;padding-top:12px;border-top:1px solid var(--color-border-tertiary,#E3E1D9);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;">
+    <div>
+      <p style="margin:0;font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--color-text-secondary,#5F5E5A);">热量</p>
+      <p style="margin:3px 0 0;display:flex;align-items:baseline;gap:3px;">
+        <span class="mcd-num" style="font-size:20px;font-weight:500;line-height:1.2;font-variant-numeric:tabular-nums;">{{ENERGY}}</span>
+        <span style="font-size:12px;color:var(--color-text-secondary,#5F5E5A);">{{ENERGY_UNIT}}</span>
+      </p>
+    </div>
+    <div>
+      <p style="margin:0;font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--color-text-secondary,#5F5E5A);">脂肪供能比</p>
+      <p style="margin:3px 0 0;display:flex;align-items:center;gap:7px;">
+        <span class="mcd-num" style="font-size:20px;font-weight:500;line-height:1.2;color:{{FAT_TIER_COLOR}};font-variant-numeric:tabular-nums;">{{FAT_PERCENT}}</span>
+        <span style="padding:2px 8px;font-size:11px;font-weight:500;border-radius:999px;background:var(--color-background-primary,#FFFFFF);color:{{FAT_TIER_COLOR}};">{{FAT_TIER}}</span>
+      </p>
+      <div style="position:relative;margin-top:9px;height:5px;border-radius:999px;background:var(--color-border-tertiary,#E3E1D9);">
+        <div style="height:5px;border-radius:999px;background:{{FAT_TIER_COLOR}};width:{{FAT_BAR_WIDTH}};max-width:100%;"></div>
+        <span style="position:absolute;top:-3px;left:35%;width:1px;height:11px;background:var(--color-text-secondary,#5F5E5A);opacity:.35;"></span>
+        <span style="position:absolute;top:-3px;left:50%;width:1px;height:11px;background:var(--color-text-secondary,#5F5E5A);opacity:.35;"></span>
+      </div>
+      <p style="margin:5px 0 0;font-size:11px;line-height:1.4;color:var(--color-text-secondary,#5F5E5A);">刻度 35% / 50% 为分档线</p>
+    </div>
+  </div>
+</div>
+
+{{NOTICE_BLOCK}}
+
+<div style="margin-top:16px;border-top:1px solid var(--color-border-tertiary,#E3E1D9);"></div>
+<div style="padding:14px 20px 16px;">
+  <p style="margin:0 0 11px;font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--color-text-secondary,#5F5E5A);">商品明细</p>
+  {{ITEMS_BLOCK}}
+</div>
+
+{{AMOUNT_BLOCK}}
+
+{{STORE_OPTIONS_BLOCK}}
+
+<div style="border-top:1px solid var(--color-border-tertiary,#E3E1D9);padding:13px 20px;display:flex;align-items:center;gap:10px;background:var(--color-background-secondary,#F7F6F2);">
+  <span style="flex:0 0 28px;width:28px;height:28px;border-radius:8px;background:#FFC72C;display:flex;align-items:center;justify-content:center;">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.2 5.4h9.6l-.65 7.05a1.1 1.1 0 0 1-1.1 1H4.95a1.1 1.1 0 0 1-1.1-1L3.2 5.4Z" stroke="#7A4B00" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.1 5.4V4.3a1.9 1.9 0 0 1 3.8 0v1.1" stroke="#7A4B00" stroke-width="1.3" stroke-linecap="round"/></svg>
+  </span>
+  <div style="min-width:0;">
+    <p style="margin:0;font-size:13px;font-weight:500;line-height:1.4;">{{TAKEWAY}}</p>
+    <p style="margin:1px 0 0;font-size:12px;line-height:1.4;color:var(--color-text-secondary,#5F5E5A);">取餐号在支付并进入配餐后分配</p>
+  </div>
+</div>
+
+{{ACTIONS_BLOCK}}
+
+<div id="mcd-manual" hidden style="margin:0 20px 16px;padding:11px 13px;background:var(--color-background-secondary,#F7F6F2);border-radius:10px;">
+  <p style="margin:0;font-size:12px;line-height:1.6;color:var(--color-text-secondary,#5F5E5A);">当前环境不支持点击回传，请回到对话里发送这句：</p>
+  <p id="mcd-manual-text" class="mcd-num" style="margin:6px 0 0;font-size:13px;font-family:var(--font-mono,ui-monospace,Consolas,monospace);color:var(--color-text-primary,#2C2C2A);word-break:break-all;"></p>
+</div>
+
+</div>
+<script>
+function act(text) {
+  if (typeof sendPrompt === 'function') { sendPrompt(text); return; }
+  var box = document.getElementById('mcd-manual');
+  var out = document.getElementById('mcd-manual-text');
+  if (box && out) { out.textContent = text; box.hidden = false; }
+}
+</script>
