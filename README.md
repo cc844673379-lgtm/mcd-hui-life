@@ -1,6 +1,6 @@
-# 双预算点餐 · mcd-dual-budget-order
+# 麦惠生活 · mcd-hui-life
 
-一个麦当劳点餐 Skill：**同时管住「花多少钱」和「摄入多少热量」两条预算**，算出真实可下单的搭配，并按需判定「不油腻」。
+**麦惠生活**是一个麦当劳点餐 Skill，**同时管住「花多少钱」和「摄入多少热量」两条预算**，算出真实可下单的搭配，并按需判定「不油腻」。名字里的「麦」是麦当劳，「惠」是实惠——省下的不只是钱，还有热量。
 
 > 双预算 + 清淡偏好 + 券省钱，三者交叉求解，并且每个数字都经过麦当劳 MCP 的真实接口验证。
 
@@ -71,10 +71,10 @@
 
 ```text
 # 用户级（所有项目可用）
-~/.workbuddy/skills/mcd-dual-budget-order/
+~/.workbuddy/skills/mcd-hui-life/
 
 # 或项目级
-<项目>/.workbuddy/skills/mcd-dual-budget-order/
+<项目>/.workbuddy/skills/mcd-hui-life/
 ```
 
 ### 第四步：验证环境
@@ -229,7 +229,7 @@ Skill **不代替用户支付**：下单后只把支付链接与引导语交给�
 ## 项目结构
 
 ```text
-mcd-dual-budget-order/
+mcd-hui-life/
 ├── SKILL.md                        # Skill 主体：8 步流程 + 四条铁律 + 完整示例
 ├── skill-dependencies.json         # 依赖声明：4 项能力 × 3 个依赖 × 逐项降级
 ├── references/
